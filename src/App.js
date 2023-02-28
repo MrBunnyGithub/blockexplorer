@@ -20,17 +20,62 @@ const settings = {
 const alchemy = new Alchemy(settings);
 
 function App() {
-  const [blockNumber, setBlockNumber] = useState();
+  //const [blockNumber, setBlockNumber] = useState();
+  const [address, setAddress] = useState();
+  const [contract, setContract] = useState();
+  const [contractName, setContractName] = useState();
+  const [balance, setBalance] = useState();
+  const [symbol, setSymbol] = useState();
 
   useEffect(() => {
-    async function getBlockNumber() {
-      setBlockNumber(await alchemy.core.getBlockNumber());
+    
+
+    async function getTokenData(address,contract) {
+      
+      const token  = await alchemy.core.getTokenBalances(address,[contract]);
+
+      console.log(token);
+
+      let balance = token.tokenBalances[0].tokenBalance;
+
+      // Get metadata of token
+      const metadata = await alchemy.core.getTokenMetadata(contract);
+      console.log(metadata);
+
+      // Compute token balance in human-readable format
+      balance = balance / Math.pow(10, metadata.decimals);
+      balance = balance.toFixed(2);
+
+      setBalance(balance);
+      setContractName(metadata.name);
+      setSymbol(metadata.symbol);
+
     }
 
-    getBlockNumber();
+    setAddress("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"); // vitalik Address
+    setContract("0xdAC17F958D2ee523a2206206994597C13D831ec7"); // USDT Contract
+
+    getTokenData(address,contract);
+
+    //let token = getTokenData(address,contract);
+    //console.log(token);
+
+    //let balance =  token.address;
+    //  console.log(balance);
+
   });
 
-  return <div className="App">Block Number: {blockNumber}</div>;
+ return (
+
+  <div className="App">
+  <div>Vitalik Address: {address}</div>
+  <div>Contract Name: {contractName}</div>
+  <div> Contract Symbol: ${symbol}</div>
+  <div>Balance: {balance}</div>
+  </div>
+  );
+
+
 }
 
 export default App;
